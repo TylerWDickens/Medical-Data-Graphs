@@ -1,4 +1,4 @@
-### Medical Data Visuliazer
+### Medical Data Visualizer
 
 Visualize and make calculations from medical examination data.
 
