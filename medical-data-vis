@@ -1,0 +1,78 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Import data
+df = pd.read_csv("medical_examination.csv")
+
+# Add 'overweight' column
+
+bmi = (df["weight"] / ((df["height"]/100) ** 2 ))
+bmi = np.array(bmi)
+
+
+bmi = np.where(bmi > 25, 1, 0 )
+
+# bmi = np.where(bmi < 25, bmi, 1)
+df['overweight'] = bmi.astype(int)
+
+
+
+df["cholesterol"] = np.where((df["cholesterol"] == 1), 0, 1 )
+df["gluc"] = np.where((df["gluc"] == 1), 0, 1)
+
+
+# Draw Categorical Plot
+def draw_cat_plot():
+   
+    df_cat = pd.melt(df, id_vars=["cardio"], value_vars=['active', 'alco', "cholesterol" , 'gluc', 'overweight', 'smoke'] )
+
+
+    figure = sns.catplot(x= "variable", kind ="count" ,hue = "value", data = df_cat, col= "cardio")
+
+    figure.set_axis_labels("variable", "total")
+
+    sns.set_theme(style="darkgrid")
+
+    fig = figure.fig
+
+
+    fig.savefig('catplot.png')
+    print('Cat plot saved')
+    return fig
+
+
+# Draw Heat Map
+def draw_heat_map():
+    # Clean the data
+    df_heat = df[(df['ap_lo'] <= df['ap_hi']) & (df['height'] >= df['height'].quantile(0.025))
+
+    & (df['height'] <= df['height'].quantile(0.975) )
+    
+    & (df['weight'] >= df['weight'].quantile(0.025))
+    
+    & (df['weight'] <= df['weight'].quantile(0.975) ) ]
+    
+    # Calculate the correlation matrix
+    corr = df_heat.corr( )
+
+    # Generate a mask for the upper triangle
+    mask = np.triu(np.ones_like(corr, dtype= bool))
+
+    # Set up the matplotlib figure
+    fig, ax = plt.subplots(figsize = (10,10))
+
+    # # Draw the heatmap
+
+    dfplot = sns.heatmap(corr, fmt=".1f", vmax= 0.26,annot_kws={'size':11}, cmap='PRGn', annot=True, mask=mask)
+
+   
+    
+    fig.savefig('heatmap.png')
+    print('Heatmap Saved')
+    return fig
+
+draw_cat_plot()
+
+draw_heat_map()
